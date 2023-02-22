@@ -17,6 +17,90 @@ parse方法根据mode指定的模式去调用相应的方法：
 - parce_task(html, **kwargs) - 解析 task 页面  
 - parce_method(html, **kwargs) - 解析 method 页面  
 
+#### 返回字段：
+这里介绍先简单列下每个函数的返回字段及类型，具体请客官们自行探索
+~~~
+# paese_query
+dict(
+    page_title=,
+    page_url=,
+    results=list_of_dict(
+        dict(
+            paper_name = ,
+            paper_url = ,
+            code_info = ,
+            date_info = ,
+            conference_info = ,
+            other_info = ,
+            strip_abstract = ,
+            tasks = ,
+            star = ,
+            paper_url2 = 
+        )
+    )
+)
+
+# parse paper
+return dict(
+    page_url=page_url,
+    page_title=page_title,
+    paper_title=paper_title,
+    paper_urls=paper_urls,
+    authors=authors,
+    conference_info=conference_info,
+    date=date,
+    abstract=abstract,
+    code_lst=code_lst,
+    datasets_lst=datasets_lst,
+    task_lst=task_lst,
+    sota_records_list=sota_records_list,
+    methods_lst=methods_lst,
+)
+
+# parse benchmark
+return sota_list        # 我也还没细看
+
+# parse dataset
+return dict(
+    title=title,
+    page_title=page_title,
+    page_url=page_url,
+    paper_title=paper_title,
+    paper_url=paper_url,
+    abstract=abstract,
+    source_url=source_url,
+    benchmark_lst=benchmark_lst,
+    paper_lst=all_papers,
+    task_lst=task_lst,
+    similar_datasset_lst=similar_datasset_lst
+)
+
+# parse task
+return dict(
+    task_name=task_name,
+    page_title=page_title,
+    page_url=page_url,
+    task_info=task_info,
+    description=description,
+    benchmark_lst=benchmark_lst,
+    datasets_lst=datasets_lst,
+    datasets_link=datasets_link,
+    tasks_lst=tasks_lst,
+    paper_lst=paper_lst
+)
+
+# parse method
+return dict(
+    method_title=method_title,
+    method_info=method_info,
+    method_paper_name=method_paper_name,
+    method_paper_url=method_paper_url,
+    components=components,
+    category=category
+)
+
+~~~
+
 #### 当你获取到相应的 url，可以这样去使用：
 ~~~
 # replace by you self:
@@ -57,10 +141,14 @@ project = PaperProject('Attention is all you need')
 project.load()
 ~~~
 
+## TODO:
+目前正在完善功能，将在 main.py 中包装一些命令，从而更灵活的使用该工具。  
+对于一些简单的功能，您可以自行编写 python 脚本完成。
 
 ## About
 作者：冷焯  
 邮箱：len@stu.pku.edu.cn
+
 
 
 

@@ -26,10 +26,9 @@ class PaperProject():
         self.tasks = dict()
         self.methods = dict()
 
-        self.tool = PwcTools
+        self.google_res = dict()
 
-        
-        
+        self.tool = PwcTools
 
     def add_paper(self,paper):
         assert 'paper_name' in paper
@@ -118,7 +117,8 @@ class PaperProject():
                 benchmarks = self.benchmarks,
                 datasets = self.datasets,
                 tasks = self.tasks,
-                methods = self.methods
+                methods = self.methods,
+                google_res = self.google_res
             ),open(os.path.join(self.path,self.name+'.json'),'w'))
 
         
@@ -126,6 +126,9 @@ class PaperProject():
         assert mode in ['write','merge']
         if file=='default':
             file = os.path.join(self.path, self.name+'.json')
+        if not os.path.exists(file):
+            self.save()
+            return
         if file.endswith('json'):
             res = json.load(open(file,'r'))
             if mode=='write':
@@ -137,6 +140,8 @@ class PaperProject():
                 self.datasets = res['datasets']
                 self.tasks = res['tasks']
                 self.methods = res['methods']
+                if 'google_res' in res:
+                    self.google_res = res['google_res']
             elif mode=='merge':
                 self.queries.update(res['queries'])
                 self.papers.update(res['papers'])
@@ -144,6 +149,8 @@ class PaperProject():
                 self.datasets.update(res['datasets'])
                 self.tasks.update(res['tasks'])
                 self.methods.update(res['methods'])
+                if 'google_res' in res:
+                    self.google_res.update(res['google_res'])
         elif file.endswith('pkl'):
             if mode=='write':
                 self=pkl.load(open(os.path.join(self.path,self.name+'.pkl'),'rb'))
@@ -155,8 +162,9 @@ class PaperProject():
                 self.datasets.update(project.datasets)
                 self.tasks.update(project.tasks)
                 self.methods.update(project.methods)
+                self.google_res.update(project.google_res)
 
-    def toexecl(self):
+    def to_excel(self):
         save_excel = os.path.join(self.path,f"{self.name}.xlsx")
         wbook = xlsxwriter.Workbook(save_excel)
         wsheet = wbook.add_worksheet('papers')
@@ -180,54 +188,24 @@ class PaperProject():
             datasets=datasets[:-1]
             wsheet.write_row(row=ii+1,col=1,data=(title,url,code,star,authors,conference,date,abstract,datasets))
 
-
         print(f"saving {save_excel}")
         wbook.close()
 
+    def summary(self):
+        print(f"======================== Summary of project {self.name} ========================")
+        
+    def get_paperurl_from_tasks(self):
+        urls = []
+        for k, t in self.tasks.items():
+            papers = t['paper_lst']
+            for paper in papers:
+                url = paper['paper_url']
+                urls.append(url)
+        return urls
 
-
-
-
-if __name__=='__main__':
-    queries = [
-        'continual object detection',
-        'incremental learning for object detection',
-        'incremental learning',
-        'continual learning'
-        ]
-    project = PaperProject('glip4det-continual-OD')
-    # for q in queries:
-    #     print(f'\n======================================== Serching query {q} ========================================')
-    #     project.parse_query(q)
-    # # project.save()
-    # project.save('json')
-
-    # # project.load('default')
-    # project.parse_mode('https://paperswithcode.com/task/continual-learning')
-    # project.parse_mode('https://paperswithcode.com/task/incremental-learning')
-
-    # # project.save()
-    # project.save('json')
-
-
-    
-
-    # project = PaperProject('glip4det-continual-OD')
-    # project.load('default')
-    # project.save()
-
-    # for k, tasks in project.tasks.items():
-    #     for benchmark in tasks['benchmark_lst']:
-    #         url = benchmark['Dataset'][0]
-    #         project.parse_mode(url)
-    # project.save()
-
-    project.load()
-    # for k, tasks in project.tasks.items():
-    #     for paper in tasks['paper_lst']:
-    #         url = paper['paper_url']
-    #         project.parse_mode(url)
-    # project.save()
-
-    project.toexecl()
-    print('exit...')
+    def get_paperurl_from_queries(self):
+        urls = []
+        for k, q in self.queries.items():
+            for kk, paper in q.items():
+                urls.append(paper['paper_url'])
+        return urls
